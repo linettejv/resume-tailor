@@ -1,0 +1,131 @@
+# ---------------------------------------------------------------------------
+# EXAMPLE fact bank. Copy to experience.yaml (git-ignored) and fill in your own.
+# Your fact bank: the ONLY source of truth the agent may use.
+#
+# Every bullet the agent writes must cite one or more fact ids from this file,
+# and any number in a bullet must appear in the facts it cites. That's how the
+# app stops the model from inventing experience.
+#
+# TODO (Linette): replace every "FILL IN" and copy in the rest of your real
+# bullets from your master resume (linette_resume_fullstack_v2.tex).
+# Lines marked "confirm" came from older resumes; check them before relying on them.
+# ---------------------------------------------------------------------------
+
+basics:
+  name: Linette Joseph
+  title: Software Engineer
+  location: Kochi, India
+  email: you@example.com
+  phone: +91 00000 00000
+  linkedin: linkedin.com/in/your-handle
+  github: https://github.com/linettejv         
+
+# Skills the agent may list. It can reorder these to match a job,
+# but it can't add a skill that isn't here.
+skills:
+  - React
+  - Typescript
+  - Python
+  - React Query
+  - JavaScript
+  - Python
+  - Flask
+  - REST APIs
+  - SQL
+  - BigQuery
+  - Cloud Spanner
+  - Google Cloud
+  - Dagster
+  - RabbitMQ
+  - Grafana
+  - Loki
+  - D3.js
+  - WebGL
+  - Skia / CanvasKit
+  - Lexical
+  - Claude API
+  - MCP
+  - Cursor
+  - GitHub Copilot
+  - Docker
+  - Kubernetes
+  - Agentic Coding 
+
+
+# Shown as "Currently learning"; never presented as experience.
+learning:
+  - Kubernetes
+  - Data structures & algorithms (Python)
+  - Express
+  - Relational database design and query optimisation
+  - LLMs
+
+roles:
+  - id: pencil
+    company: "KeyValue Software Systems (client: Pencil, Brandtech Group)"
+    title: Software Engineer
+    location: Kochi
+    dates: Sep 2023 -- Present
+    facts:
+      - id: tenure
+        text: Software Engineer at KeyValue since Sep 2023, 3+ years building a production product.   # confirm wording
+        tags: [experience, years]
+      - id: pr-reviews
+        text: Reviewed 673 pull requests across 3 repositories, raising code quality and helping teammates ship safely.
+        tags: [code review, collaboration, quality, mentoring]
+      - id: sheets-pipeline
+        text: Rebuilt the Google Sheets integration from a cron-based sync into a tracked RabbitMQ pipeline, halving API calls per sync.
+        tags: [backend, messaging, rabbitmq, performance, integrations, reliability]
+      - id: on-call
+        text: Took part in on-call, using Grafana and Loki to investigate and resolve production issues.
+        tags: [on-call, observability, monitoring, devops, production]
+      - id: flask-apis
+        text: Built and maintained Flask REST APIs used by the product frontend.
+        tags: [backend, python, flask, rest, api]
+      - id: react-query
+        text: Built data-heavy React screens using React Query for fetching, caching and server-state management.
+        tags: [frontend, react, react query, state management]
+      - id: canvas-rendering
+        text: Built a Lexical-based text layer and migrated canvas rendering to Skia / CanvasKit.
+        tags: [frontend, rendering, canvas, skia, webgl, graphics, performance]
+      - id: loader-refactor
+        text: Refactored the asset loader to useSyncExternalStore, simplifying 8 call sites.
+        tags: [frontend, react, refactoring, performance]
+      - id: sql-data
+        text: Wrote SQL in Cloud Spanner, BigQuery and Hydra to repair production table data and feed business dashboards, with pipelines orchestrated in Dagster.
+        tags: [sql, data engineering, bigquery, spanner, dagster, google cloud, dashboards]
+      - id: customers
+        text: Spoke directly with customers to understand their problems and shape product fixes.
+        tags: [customer facing, product, communication, ux]
+      - id: dataviz
+        text: Built data visualisations with D3.js and WebGL.   # confirm which project
+        tags: [frontend, d3, webgl, data visualisation]
+      - id: verification-agent
+        text: Built an autonomous verification agent to check product output.   # FILL IN: what it checked, how, impact
+        tags: [ai, agents, automation, testing]
+
+projects:
+  - id: personal-agents
+    name: Personal AI agents
+    facts:
+      - id: email-agent
+        text: Designed an email-triage agent with Claude and MCP connectors that flags messages needing my attention.
+        tags: [ai, agents, mcp, automation]
+      - id: job-scout
+        text: Designed a job-scout agent with Claude connectors that searches Indeed, InstaHire and Wellfound and ranks openings against my profile.
+        tags: [ai, agents, mcp, automation]
+  - id: resume-tailor
+    name: Resume Tailor (AI job-matching agent)
+    link: FILL IN   # GitHub URL once you push it
+    facts:
+      - id: rt-agent
+        text: Built a resume-tailoring agent with the Claude API, tool calling, Flask and React that scores job fit and rewrites resume bullets.
+        tags: [ai, agents, llm, claude api, tool calling, flask, react, full stack]
+      - id: rt-verify
+        text: Added a verification step that rejects any bullet not backed by a cited fact, so the model can't invent experience.
+        tags: [ai, llm, guardrails, validation, reliability]
+
+education:
+  - school: Government engineering college, thrissur
+    degree: B.tech
+    dates: 2019 - 2023

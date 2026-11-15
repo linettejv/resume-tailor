@@ -1,0 +1,14 @@
+.env
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+frontend/dist/
+backend/output/*
+!backend/output/.gitkeep
+.DS_Store
+
+# Private: real contact details live here. Commit experience.example.yaml instead.
+backend/data/experience.yaml
+# Reference answer for the agent loop; keep your own implementation public instead.
+backend/solutions/
