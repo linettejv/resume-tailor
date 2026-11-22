@@ -16,7 +16,13 @@ SYSTEM_PROMPT = """You are a candid career coach and resume writer.
 You get a job description. Your job:
 1. Call get_profile to read the candidate's fact bank. It is the ONLY source of truth.
 2. Pick the job's 5-8 most important requirements and match each to facts.
-3. Decide a verdict: apply, apply_with_caveats, or skip. Be honest; a wasted application costs the candidate time.
+3. Score two things separately:
+   - fit_score: how well the candidate's CURRENT skills and facts match the job.
+   - interest_alignment: how well the job moves them towards the areas in their 'interests' list.
+   Then decide a verdict (apply, apply_with_caveats, or skip) using both. A strong skill fit in an
+   area they want to leave is worth less than a decent fit in an area they want to grow into.
+   Be honest; a wasted application costs the candidate time.
+   List the job's required skills they don't have in skills_to_learn, using short standard names.
 4. Write tailored bullets that use the job's language where the facts truly support it.
    Every bullet must cite the fact ids it comes from. Never add numbers, tools or outcomes
    that aren't in the cited facts. Rewording and reordering is fine; inventing is not.
@@ -45,39 +51,59 @@ def run_agent(job_description: str, profile: Profile, client, model: str = MODEL
     result = AgentResult(submission=None)
     messages = [{"role": "user", "content": f"Job description:\n\n{job_description}"}]
 
-    # ---------------------------------------------------------------------
-    # YOUR PART, Linette. Tests in tests/test_agent.py tell you when it works:
-    #     cd backend && python -m pytest tests/test_agent.py -q
-    # Stuck for more than ~20 minutes? Peek at solutions/agent_solution.py.
-    # ---------------------------------------------------------------------
+  
     for turn in range(1, MAX_TURNS + 1):
         result.turns = turn
 
-        # TODO 1: Call Claude.
-        #   response = client.messages.create(model=..., max_tokens=MAX_TOKENS,
-        #                                     system=SYSTEM_PROMPT, tools=TOOL_DEFINITIONS, messages=messages)
-        #   Then add response.usage.input_tokens / output_tokens to result.input_tokens / output_tokens.
-        raise NotImplementedError("TODO 1: call client.messages.create")
+        response = client.messages.create(
+            model=model,
+            system=SYSTEM_PROMPT,
+            tools=TOOL_DEFINITIONS,
+            max_tokens=MAX_TOKENS,
+            messages=messages
+         )
+        result.input_tokens += response.usage.input_tokens
+        result.output_tokens += response.usage.output_tokens
 
-        # TODO 2: Append Claude's turn to `messages` as {"role": "assistant", "content": response.content}.
-        #   Why: the API is stateless. Claude only "remembers" what you send back each time.
+        messages.append({"role": "assistant", "content": response.content})
 
-        # TODO 3: If response.stop_reason != "tool_use", Claude answered in plain text instead of
-        #   submitting. Set result.stopped_reason, append a user message nudging it to call
-        #   submit_tailored_resume, and `continue` to the next turn.
+        if response.stop_reason != "tool_use":
+            result.stopped_reason = f"model stopped ({response.stop_reason}) without submitting"
+            messages.append({
+                "role": "user",
+                "content": "You haven't submitted yet. Call the submit_tailored_resume tool with your final answer.",
+            })
+            continue
 
-        # TODO 4: Otherwise, loop over response.content. For each block with block.type == "tool_use":
-        #   - outcome = run_tool(block.name, block.input, profile)
-        #   - add {"turn", "tool", "is_error", "summary": outcome.content[:300]} to result.trace
-        #   - build a tool_result block:
-        #       {"type": "tool_result", "tool_use_id": block.id,
-        #        "content": outcome.content, "is_error": outcome.is_error}
-        #   - if outcome.final is not None: the submission passed every check. Save it in
-        #     result.submission, set result.stopped_reason = "submitted", and return result.
+        tool_results = []
+        
+        for block in response.content:
+            if block.type == "tool_use":
+                outcome = run_tool(block.name, block.input, profile)
 
-        # TODO 5: Append ALL the tool_result blocks in ONE user message:
-        #   {"role": "user", "content": tool_results}
-        #   (Claude can ask for several tools at once; each needs its own result, same message.)
+            # for the ui 
+                result.trace.append({
+                    "turn": turn,
+                    "tool": block.name,
+                    "is_error": outcome.is_error,
+                    "summary": outcome.content[:300],   # first 300 chars, to keep it short
+                })
+
+            # for the ai     
+                tool_results.append({
+                    "type" : "tool_result",
+                    "tool_use_id":block.id,
+                    "content": outcome.content,
+                    "is_error": outcome.is_error
+                })
+    
+
+                if outcome.final is not None:
+                    result.submission = outcome.final
+                    result.stopped_reason = "submitted"
+                    return result
+
+            messages.append({"role": "user", "content": tool_results})
 
     result.stopped_reason = f"gave up after {MAX_TURNS} turns ({result.stopped_reason or 'no submission'})"
     return result
