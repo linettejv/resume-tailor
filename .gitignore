@@ -12,3 +12,4 @@ backend/output/*
 backend/data/experience.yaml
 # Reference answer for the agent loop; keep your own implementation public instead.
 backend/solutions/
+.vscode/

@@ -85,3 +85,20 @@ ul.plain { list-style: none; padding: 0; display: flex; flex-direction: column; 
 .turn { font-size: 12px; color: var(--muted); width: 52px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
 .trace li.bad { color: var(--skip); }
 .rejected { font-size: 11px; background: #fbeaea; padding: 1px 7px; border-radius: 999px; }
+
+.scores { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+@media (max-width: 700px) { .scores { grid-template-columns: 1fr; } }
+.score-head { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 14px; }
+.score-block .meter { margin: 4px 0 2px; }
+.score-block.high .meter div { background: var(--apply); }
+.score-block.mid .meter div { background: var(--caveat); }
+.score-block.low .meter div { background: var(--skip); }
+.score-block p { margin: 0; }
+.chip.learn { background: #fbf3e4; color: #8a5a12; }
+
+.pulse { border-left: 5px solid var(--accent); }
+.bars { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.bars li { display: grid; grid-template-columns: 140px 1fr 60px; gap: 10px; align-items: center; font-size: 14px; }
+.bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: #c48a2c; border-radius: 4px; }
+.bar-count { font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }

@@ -23,19 +23,26 @@ _BULLETS = [
 _SUBMISSION = {
     "verdict": "apply",
     "fit_score": 81,
-    "verdict_reason": "Strong match on React, rendering performance and API work. The main gap is TypeScript, "
-                      "which the role lists as required and your fact bank doesn't mention yet.",
+    "verdict_reason": "Strong match on React, TypeScript and rendering performance. It's a good role, but it "
+                      "keeps you frontend-only, so weigh it against roles that grow your backend or DevOps side.",
     "summary": "Frontend-leaning full-stack engineer, 3+ years building a production product with React, "
                "canvas rendering and Flask APIs.",
     "summary_fact_ids": ["tenure", "react-query", "canvas-rendering", "flask-apis"],
     "matched_requirements": [
-        {"requirement": "React and modern state management", "fact_ids": ["react-query", "loader-refactor"]},
+        {"requirement": "React and TypeScript", "fact_ids": ["typescript", "react-query"]},
+        {"requirement": "Modern React state management", "fact_ids": ["loader-refactor"]},
         {"requirement": "Rendering performance", "fact_ids": ["canvas-rendering"]},
         {"requirement": "Working with backend APIs", "fact_ids": ["flask-apis"]},
         {"requirement": "Code quality and reviews", "fact_ids": ["pr-reviews"]},
     ],
-    "gaps": ["TypeScript (add it to experience.yaml if you've used it)", "Design systems / component libraries"],
-    "skills": ["React", "React Query", "JavaScript", "Skia / CanvasKit", "WebGL", "D3.js", "Python", "Flask", "REST APIs"],
+    "gaps": ["Design systems / component libraries"],
+    "interest_alignment": {
+        "score": 55,
+        "matched_interests": ["Customer-facing product engineering"],
+        "notes": "Mostly frontend work. It keeps you close to customers but adds little backend, data or DevOps growth.",
+    },
+    "skills_to_learn": ["Design systems"],
+    "skills": ["React", "TypeScript", "React Query", "JavaScript", "Skia / CanvasKit", "WebGL", "D3.js", "Python", "Flask", "REST APIs"],
     "bullets": _BULLETS,
 }
 

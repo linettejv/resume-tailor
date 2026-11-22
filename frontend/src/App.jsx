@@ -29,7 +29,21 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
+  const [trends, setTrends] = useState(null)
   const elapsed = useElapsed(loading)
+
+  async function loadTrends() {
+    try {
+      const res = await fetch('/api/trends?days=30')
+      if (res.ok) setTrends(await res.json())
+    } catch {
+      // trends are a nice-to-have; ignore if the backend is down
+    }
+  }
+
+  useEffect(() => {
+    loadTrends()
+  }, [])
 
   async function tailor(e) {
     e.preventDefault()
@@ -49,6 +63,7 @@ export default function App() {
       setError("Couldn't reach the backend. Is Flask running on port 5001?")
     } finally {
       setLoading(false)
+      loadTrends()
     }
   }
 
@@ -93,6 +108,8 @@ export default function App() {
 
         <section className="results">
           {error && <div className="card error">{error}</div>}
+          {trends && trends.jobs > 0 && <MarketPulse t={trends} />}
+
           {!data && !error && !loading && (
             <div className="card empty muted">Your fit check and tailored resume will show up here.</div>
           )}
@@ -103,10 +120,21 @@ export default function App() {
               <div className={`card verdict ${sub.verdict}`}>
                 <div className="verdict-row">
                   <span className="badge">{VERDICT_LABEL[sub.verdict]}</span>
-                  <span className="score">{sub.fit_score}<small>/100 fit</small></span>
                 </div>
-                <div className="meter"><div style={{ width: `${sub.fit_score}%` }} /></div>
+                <div className="scores">
+                  <Score label="Skills fit" hint="your current skills vs this job" value={sub.fit_score} />
+                  <Score
+                    label="Interest fit"
+                    hint="does this job move you where you want to go?"
+                    value={sub.interest_alignment.score}
+                  />
+                </div>
                 <p>{sub.verdict_reason}</p>
+                <p className="muted small">
+                  {sub.interest_alignment.notes}
+                  {sub.interest_alignment.matched_interests.length > 0 &&
+                    ` Grows: ${sub.interest_alignment.matched_interests.join(', ')}.`}
+                </p>
                 {data.files && (
                   <div className="downloads">
                     {data.files.pdf && <a className="btn" href={`/api/files/${data.files.pdf}`}>Download PDF</a>}
@@ -135,6 +163,14 @@ export default function App() {
                     <ul>{sub.gaps.map((g) => <li key={g}>{g}</li>)}</ul>
                   ) : (
                     <p className="muted">No gaps found.</p>
+                  )}
+                  {sub.skills_to_learn.length > 0 && (
+                    <>
+                      <h2>Skills to learn</h2>
+                      <div className="chips">
+                        {sub.skills_to_learn.map((s) => <span key={s} className="chip learn">{s}</span>)}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -181,6 +217,50 @@ export default function App() {
           )}
         </section>
       </main>
+    </div>
+  )
+}
+
+function Score({ label, hint, value }) {
+  const level = value >= 70 ? 'high' : value >= 45 ? 'mid' : 'low'
+  return (
+    <div className={`score-block ${level}`}>
+      <div className="score-head">
+        <span>{label}</span>
+        <span className="score">{value}<small>/100</small></span>
+      </div>
+      <div className="meter"><div style={{ width: `${value}%` }} /></div>
+      <p className="muted small">{hint}</p>
+    </div>
+  )
+}
+
+function MarketPulse({ t }) {
+  const max = Math.max(...t.top_skills_to_learn.map((s) => s.jobs), 1)
+  return (
+    <div className="card pulse">
+      <h2>Market pulse · last {t.days} days</h2>
+      <p className="small muted">
+        {t.jobs} {t.jobs === 1 ? 'job' : 'jobs'} checked · avg skills fit {t.avg_fit} · avg interest fit {t.avg_interest}
+        {' · '}
+        {Object.entries(t.verdicts).map(([v, n]) => `${n} ${VERDICT_LABEL[v].toLowerCase()}`).join(', ')}
+      </p>
+      {t.top_skills_to_learn.length > 0 ? (
+        <>
+          <p className="small"><strong>Skills you don't have yet that keep coming up:</strong></p>
+          <ul className="bars">
+            {t.top_skills_to_learn.map((s) => (
+              <li key={s.skill}>
+                <span className="bar-label">{s.skill}</span>
+                <span className="bar"><span style={{ width: `${(s.jobs / max) * 100}%` }} /></span>
+                <span className="bar-count">{s.jobs} of {t.jobs}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="small muted">No missing skills across these jobs.</p>
+      )}
     </div>
   )
 }

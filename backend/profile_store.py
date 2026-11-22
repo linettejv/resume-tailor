@@ -22,6 +22,10 @@ class Profile:
         return list(self.raw.get("skills", []))
 
     @property
+    def interests(self) -> list[str]:
+        return list(self.raw.get("interests", []))
+
+    @property
     def section_ids(self) -> list[str]:
         return [r["id"] for r in self.raw.get("roles", [])] + [
             p["id"] for p in self.raw.get("projects", [])

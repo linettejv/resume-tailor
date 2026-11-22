@@ -96,11 +96,36 @@ TOOL_DEFINITIONS = [
                     "items": {"type": "string"},
                     "description": "Skills to show, most relevant first. Only from the profile's skills list.",
                 },
+                "interest_alignment": {
+                    "type": "object",
+                    "description": (
+                        "How well this job moves the candidate towards the areas in the profile's "
+                        "'interests' list. Separate from fit_score, which is about current skills."
+                    ),
+                    "properties": {
+                        "score": {"type": "integer", "minimum": 0, "maximum": 100},
+                        "matched_interests": {
+                            "type": "array", "items": {"type": "string"},
+                            "description": "Exact entries from the profile's interests list that this job develops.",
+                        },
+                        "notes": {"type": "string", "description": "1-2 sentences."},
+                    },
+                    "required": ["score", "matched_interests", "notes"],
+                },
+                "skills_to_learn": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Short, canonical names of skills this job asks for that are NOT in the profile's "
+                        "skills list, e.g. 'Node.js', 'AWS', 'GraphQL'. Used to track market trends "
+                        "across many jobs, so keep names consistent and don't add descriptions."
+                    ),
+                },
                 "bullets": {"type": "array", "items": _BULLET_SCHEMA},
             },
             "required": [
                 "verdict", "fit_score", "verdict_reason", "summary", "summary_fact_ids",
-                "matched_requirements", "gaps", "skills", "bullets",
+                "matched_requirements", "gaps", "skills", "interest_alignment", "skills_to_learn", "bullets",
             ],
         },
     },
@@ -166,6 +191,19 @@ def validate_submission(sub: dict, profile: Profile) -> list[str]:
     extra = [s for s in sub.get("skills", []) if s.lower() not in allowed]
     if extra:
         errors.append(f"skills {extra} are not in the profile; move real gaps to 'gaps' instead")
+
+    ia = sub.get("interest_alignment") or {}
+    ia_score = ia.get("score")
+    if not isinstance(ia_score, int) or not 0 <= ia_score <= 100:
+        errors.append("interest_alignment.score must be an integer 0-100")
+    known_interests = {i.lower() for i in profile.interests}
+    odd = [i for i in ia.get("matched_interests", []) if i.lower() not in known_interests]
+    if odd:
+        errors.append(f"matched_interests {odd} are not in the profile's interests list {profile.interests}")
+
+    already = [s for s in sub.get("skills_to_learn", []) if s.lower() in allowed]
+    if already:
+        errors.append(f"skills_to_learn {already} are already in the profile's skills; remove them")
 
     for m in sub.get("matched_requirements", []):
         bad = [f for f in m.get("fact_ids", []) if f not in profile.facts]

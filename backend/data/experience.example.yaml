@@ -24,11 +24,10 @@ basics:
 # but it can't add a skill that isn't here.
 skills:
   - React
-  - Typescript
+  - TypeScript
   - Python
   - React Query
   - JavaScript
-  - Python
   - Flask
   - REST APIs
   - SQL
@@ -48,8 +47,7 @@ skills:
   - Cursor
   - GitHub Copilot
   - Docker
-  - Kubernetes
-  - Agentic Coding 
+  - Agentic Coding
 
 
 # Shown as "Currently learning"; never presented as experience.
@@ -59,6 +57,16 @@ learning:
   - Express
   - Relational database design and query optimisation
   - LLMs
+
+# Areas you want to move towards. The agent scores how well each job fits these,
+# separately from how well your skills fit the job. Edit freely.
+interests:
+  - Backend engineering
+  - Data engineering
+  - DevOps / platform engineering
+  - AI / LLM applications
+  - Design and UX research
+  - Customer-facing product engineering
 
 roles:
   - id: pencil
@@ -82,6 +90,9 @@ roles:
       - id: flask-apis
         text: Built and maintained Flask REST APIs used by the product frontend.
         tags: [backend, python, flask, rest, api]
+      - id: typescript
+        text: Used TypeScript as my day-to-day language on the Pencil React frontend, relying on strict types to keep component props and API contracts safe.
+        tags: [frontend, typescript, react, type safety]
       - id: react-query
         text: Built data-heavy React screens using React Query for fetching, caching and server-state management.
         tags: [frontend, react, react query, state management]
@@ -100,11 +111,14 @@ roles:
       - id: dataviz
         text: Built data visualisations with D3.js and WebGL.   # confirm which project
         tags: [frontend, d3, webgl, data visualisation]
-      - id: verification-agent
-        text: Built an autonomous verification agent to check product output.   # FILL IN: what it checked, how, impact
-        tags: [ai, agents, automation, testing]
 
 projects:
+  - id: webgl-docker
+    name: WebGL app with Dockerised backend
+    facts:
+      - id: webgl-docker-run
+        text: Built a WebGL project and ran its backend and database in Docker containers on my machine.
+        tags: [webgl, docker, containers, backend, database, devops]
   - id: personal-agents
     name: Personal AI agents
     facts:
@@ -116,7 +130,7 @@ projects:
         tags: [ai, agents, mcp, automation]
   - id: resume-tailor
     name: Resume Tailor (AI job-matching agent)
-    link: FILL IN   # GitHub URL once you push it
+    link: github.com/linettejv/resume-tailor
     facts:
       - id: rt-agent
         text: Built a resume-tailoring agent with the Claude API, tool calling, Flask and React that scores job fit and rewrites resume bullets.

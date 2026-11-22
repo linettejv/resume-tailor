@@ -16,6 +16,8 @@ def good_submission(**overrides):
         "matched_requirements": [{"requirement": "Message queues", "fact_ids": ["sheets-pipeline"]}],
         "gaps": ["Kubernetes in production"],
         "skills": ["React", "python", "RabbitMQ"],
+        "interest_alignment": {"score": 70, "matched_interests": ["Backend engineering"], "notes": "Backend-heavy."},
+        "skills_to_learn": ["Node.js", "AWS"],
         "bullets": [
             {"section_id": "pencil", "text": "Reviewed 673 pull requests across 3 repositories.", "fact_ids": ["pr-reviews"]},
         ],
@@ -54,3 +56,12 @@ def test_rejected_submission_is_tool_error():
 def test_get_profile_returns_fact_bank():
     out = run_tool("get_profile", {}, P)
     assert "sheets-pipeline" in out.content and json.loads(out.content)["basics"]
+
+
+def test_interest_must_come_from_profile():
+    sub = good_submission(interest_alignment={"score": 50, "matched_interests": ["Space travel"], "notes": ""})
+    assert any("Space travel" in e for e in validate_submission(sub, P))
+
+
+def test_skills_to_learn_cannot_repeat_known_skills():
+    assert any("already in the profile" in e for e in validate_submission(good_submission(skills_to_learn=["React"]), P))

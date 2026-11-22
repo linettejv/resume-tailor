@@ -2,6 +2,7 @@
 
 POST /api/tailor        {"job_description": "...", "label": "razorpay-frontend"}  -> verdict, bullets, trace
 GET  /api/files/<name>  download a generated .tex or .pdf
+GET  /api/trends?days=30  skills you lack that keep showing up across the jobs you've run
 GET  /api/health
 """
 from __future__ import annotations
@@ -24,6 +25,7 @@ else:
     from agent import MODEL, run_agent
 from profile_store import load_profile
 from render import compile_pdf, render_tex
+from trends import record_run, summarize
 
 OUTPUT = Path(__file__).parent / "output"
 OUTPUT.mkdir(exist_ok=True)
@@ -37,6 +39,9 @@ def make_client():
         from demo import demo_client
         return demo_client()
     import anthropic  # imported here so tests don't need an API key
+    if os.getenv("LLM_BASE_URL"):
+        # Free, local mode: Ollama speaks the same Messages API, so only the URL changes.
+        return anthropic.Anthropic(base_url=os.environ["LLM_BASE_URL"], api_key="local")
     return anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
 
 
@@ -51,7 +56,7 @@ def tailor():
     jd = (body.get("job_description") or "").strip()
     if len(jd) < 100:
         return jsonify(error="Paste the full job description (at least 100 characters)."), 400
-    if not os.getenv("ANTHROPIC_API_KEY") and os.getenv("DEMO") != "1":
+    if not (os.getenv("ANTHROPIC_API_KEY") or os.getenv("LLM_BASE_URL")) and os.getenv("DEMO") != "1":
         return jsonify(error="ANTHROPIC_API_KEY is not set. Add it to the .env file and restart."), 500
 
     profile = load_profile()  # re-read each time so edits to experience.yaml apply immediately
@@ -80,7 +85,15 @@ def tailor():
     payload["files"] = {"tex": f"{stem}.tex"}
     if compile_pdf(tex, OUTPUT / f"{stem}.pdf"):
         payload["files"]["pdf"] = f"{stem}.pdf"
+    if os.getenv("DEMO") != "1":  # don't let the scripted demo skew your real trends
+        record_run(label, result.submission)
     return jsonify(payload)
+
+
+@app.get("/api/trends")
+def trends():
+    days = max(1, min(int(request.args.get("days", 30)), 365))
+    return jsonify(summarize(days))
 
 
 @app.get("/api/files/<path:name>")
